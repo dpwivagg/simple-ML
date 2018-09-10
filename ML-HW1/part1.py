@@ -53,8 +53,14 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
+        e = 0
 
+        c = Counter(Y)
+        c_total = len(Y)
 
+        for key, value in c.items():
+            p_key = value / c_total
+            e -= p_key * math.log(p_key, 2)
 
         #########################################
         return e 
