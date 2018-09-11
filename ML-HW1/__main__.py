@@ -1,5 +1,6 @@
 from part1 import *
 import numpy as np
+from collections import Counter
 
 def load_dataset(filename='credit.csv'):
     '''
@@ -20,15 +21,26 @@ def load_dataset(filename='credit.csv'):
     #########################################
     ## INSERT YOUR CODE HERE
 
-    alldata = np.loadtxt(filename, delimiter=',', skiprows=1, dtype=str)
+    alldata = np.loadtxt(filename, delimiter=',', dtype=str)
 
-    X = alldata[:, 1:-1].T
-    Y = alldata[:, -1].T
+    attributes = alldata[0, 1:-1]
+    X = alldata[1:, 1:-1].T
+    Y = alldata[1:, -1].T
 
     #########################################
-    return X, Y
+    return attributes, X, Y
 
-X, Y = load_dataset()
+def print_tree(t, attributes, layer=0):
+    if t.isleaf:
+        print('\t' * layer, " Risk: ", t.p)
+    else:
+        for key, value in t.C.items():
+            print('\t' * layer, attributes[t.i], ": ", key)
+            print_tree(t.C[key], attributes, layer+1)
+
+a, X, Y = load_dataset()
 
 t = Tree.train(X, Y)
+
+print_tree(t, a)
 
