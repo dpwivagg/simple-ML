@@ -1,46 +1,53 @@
 from part1 import *
 import numpy as np
-from collections import Counter
 
-def load_dataset(filename='credit.csv'):
-    '''
-        Load dataset 1 from the CSV file: 'data1.csv'.
-        The first row of the file is the header (including the names of the attributes)
-        In the remaining rows, each row represents one data instance.
-        The first column of the file is the label to be predicted.
-        In remaining columns, each column represents an attribute.
-        Input:
-            filename: the filename of the dataset, a string.
-        Output:
-            X: the feature matrix, a numpy matrix of shape p by n.
-               Each element can be int/float/string.
-               Here n is the number data instances in the dataset, p is the number of attributes.
-            Y: the class labels, a numpy array of length n.
-               Each element can be int/float/string.
-    '''
-    #########################################
-    ## INSERT YOUR CODE HERE
 
-    alldata = np.loadtxt(filename, delimiter=',', dtype=str)
+class credit_tree():
+    def __init__(self, filename):
+        self.filename = filename
 
-    attributes = alldata[0, 1:-1]
-    X = alldata[1:, 1:-1].T
-    Y = alldata[1:, -1].T
+    def load_dataset(self):
+        '''
+            Load the credit risk dataset
+        '''
+        alldata = np.loadtxt(self.filename, delimiter=',', dtype=str)
 
-    #########################################
-    return attributes, X, Y
+        self.attributes = alldata[0, 1:-1]
+        self.X = alldata[1:, 1:-1].T
+        self.Y = alldata[1:, -1].T
 
-def print_tree(t, attributes, layer=0):
-    if t.isleaf:
-        print('\t' * layer, " Risk: ", t.p)
-    else:
-        for key, value in t.C.items():
-            print('\t' * layer, attributes[t.i], ": ", key)
-            print_tree(t.C[key], attributes, layer+1)
+    def create_tree(self):
+        self.t = Tree.train(self.X, self.Y)
 
-a, X, Y = load_dataset()
+    def print_tree(self, t=None, layer=0):
+        if not t:
+            t = self.t
 
-t = Tree.train(X, Y)
+        if t.isleaf:
+            print(":", t.p, " risk", end='')
 
-print_tree(t, a)
+        else:
+            for key, value in t.C.items():
+                print('\n', '|' * layer, self.attributes[t.i], '=', key, end='')
+                self.print_tree(t.C[key], layer+1)
 
+    def inference(self, data):
+        return Tree.inference(self.t, data)
+
+    def make_and_show(self):
+        self.load_dataset()
+        self.create_tree()
+        self.print_tree()
+
+######################################################
+
+credit1 = credit_tree('credit.csv')
+credit1.make_and_show()
+
+tom_risk = credit1.inference(np.array(['low', 'low', 'no', 'yes', 'male']))
+ana_risk = credit1.inference(np.array(['low', 'medium', 'yes', 'yes', 'female']))
+
+print("\n\nTom's credit risk: ", tom_risk, "\nAna's credit risk: ", ana_risk)
+
+credit2 = credit_tree('credit_sofia_high_risk.csv')
+credit2.make_and_show()
