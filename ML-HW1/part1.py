@@ -81,11 +81,15 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-        
-   
+        ce = 0
+        c_x = Counter(X)
+        ytotal = len(Y)
 
+        for x, _ in c_x.items():
+            mask = [True if val == x else False for val in X]
+            yvals = Y[mask]
+            ce += (len(yvals) / ytotal) * Tree.entropy(yvals)
 
- 
         #########################################
         return ce 
     
@@ -105,9 +109,9 @@ class Tree(object):
         '''
         #########################################
         ## INSERT YOUR CODE HERE
-    
 
-
+        # Get the initial entropy, H(Y)
+        g = Tree.entropy(Y) - Tree.conditional_entropy(Y, X)
  
         #########################################
         return g
@@ -131,10 +135,9 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
+        info_gains = [Tree.information_gain(Y, row) for row in X]
+        i = info_gains.index(max(info_gains))
 
-   
-
- 
         #########################################
         return i
 
@@ -163,7 +166,7 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-
+        
 
 
         #########################################
@@ -232,9 +235,6 @@ class Tree(object):
         ## INSERT YOUR CODE HERE
     
 
-
-
- 
         #########################################
         return y
     
