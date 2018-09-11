@@ -166,8 +166,25 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-        
+        # Get the row in question
+        x_split = X[i]
+        # ...and delete it so we don't end up putting it into a new node
+        np.delete(X, i)
 
+        c_x = Counter(x_split)
+
+        C = {}
+
+        for x, _ in c_x.items():
+            # Create a mask to identify the columns where this attribute has the value x
+            mask = [True if val == x else False for val in x_split]
+            # Get all of the labels for the columns where attribute has value x
+            labels = Y[mask]
+            # Get all of the columns in the feature matrix where attribute has value x
+            feature_cols = X[:, mask]
+
+            newnode = Node(feature_cols, labels)
+            C[x] = newnode
 
         #########################################
         return C
@@ -188,9 +205,16 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
+        s = True
+        prev = Y[0]
 
+        for item in Y[1:]:
+            if item == prev:
+                prev = item
+            else:
+                s = False
+                break
 
-        
         #########################################
         return s
     
@@ -209,12 +233,13 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-    
-   
+        s = True
 
+        for row in X:
+            if not Tree.stop1(row):
+                s = False
+                break
 
-
- 
         #########################################
         return s
     
@@ -233,7 +258,17 @@ class Tree(object):
         '''
         #########################################
         ## INSERT YOUR CODE HERE
-    
+
+        c = Counter(Y)
+
+        maxval = 0
+        y = None
+
+        for value, count in c.items():
+            if count > maxval:
+                maxval = count
+                y = value
+
 
         #########################################
         return y
