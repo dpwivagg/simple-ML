@@ -183,8 +183,7 @@ class Tree(object):
             # Get all of the columns in the feature matrix where attribute has value x
             feature_cols = X[:, mask]
 
-            newnode = Node(feature_cols, labels)
-            C[x] = newnode
+            C[x] = Node(feature_cols, labels)
 
         #########################################
         return C
@@ -291,12 +290,21 @@ class Tree(object):
         '''
         #########################################
         ## INSERT YOUR CODE HERE
+
+        t.p = Tree.most_common(t.Y)
     
+        if Tree.stop1(t.Y) or Tree.stop2(t.X):
+            # All labels are the same, place the label on the leaf OR...
+            # All attribute data is the same, choose the most common label since splitting will not give new info
+            t.isleaf = True
+            return
 
-   
+        else:
+            t.i = Tree.best_attribute(t.X, t.Y)
+            t.C = Tree.split(t.X, t.Y, t.i)
+            for _, child_node in t.C.items():
+                Tree.build_tree(child_node)
 
-
- 
         #########################################
     
     
@@ -317,8 +325,9 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
     
+        t = Node(X, Y)
 
-
+        Tree.build_tree(t)
  
         #########################################
         return t
@@ -341,12 +350,14 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
-   
+        split_attr = x[t.i]
 
+        if t.isleaf or split_attr not in t.C:
+            y = t.p
 
+        else:
+            y = Tree.inference(t.C[split_attr], x)
 
-
- 
         #########################################
         return y
     
@@ -367,9 +378,10 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
+        Y = np.array([])
 
-
-
+        for instance in X.T:
+            Y = np.append(Y, Tree.inference(t, instance))
 
         #########################################
         return Y
@@ -397,7 +409,10 @@ class Tree(object):
         #########################################
         ## INSERT YOUR CODE HERE
 
+        alldata = np.loadtxt(filename, delimiter=',', skiprows=1, dtype=str)
 
+        X = np.delete(alldata, 0, axis=1).T
+        Y = alldata[:,0].T
 
  
         #########################################
