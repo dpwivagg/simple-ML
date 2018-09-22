@@ -25,8 +25,8 @@ def compute_Phi(x,p):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
-
+    features = np.array([np.power(x,i) for i in range(p)])
+    Phi = np.asmatrix(features.T)
     #########################################
     return Phi 
 
@@ -44,7 +44,7 @@ def compute_yhat(Phi, w):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
+    yhat = np.dot(Phi, w)
 
     #########################################
 
@@ -62,8 +62,9 @@ def compute_L(yhat,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
+    difference = np.subtract(yhat, y)
+    square = np.power(difference, 2)
+    L = np.sum(square) / (2 * len(y))
 
     #########################################
     return L 
@@ -85,7 +86,9 @@ def compute_dL_dw(y, yhat, Phi):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
+    difference = np.subtract(yhat, y)
+    product = np.matmul(Phi.T, difference)
+    dL_dw = product / len(y)
 
     #########################################
     return dL_dw
@@ -107,6 +110,7 @@ def update_w(w, dL_dw, alpha = 0.001):
     #########################################
     ## INSERT YOUR CODE HERE
 
+    w = np.subtract(w, alpha*dL_dw)
 
     #########################################
     return w
@@ -129,20 +133,22 @@ def train(X, Y, alpha=0.001, n_epoch=100):
     # initialize weights as 0
     w = np.mat(np.zeros(X.shape[1])).T
 
+    Phi = X
+
     for _ in range(n_epoch):
 
     #########################################
     ## INSERT YOUR CODE HERE
+        yhat = compute_yhat(Phi, w)
 
     # Back propagation: compute local gradients 
-        
-
-        
+        dL_dw = compute_dL_dw(Y, yhat, Phi)
         
     # update the parameters w
-        
-
+        w = update_w(w, dL_dw, alpha)
+        print(w)
      #########################################
+
     return w
 
 
