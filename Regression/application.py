@@ -24,10 +24,14 @@ Xtrain, Ytrain, Xtest, Ytest = X[::2], y[::2], X[1::2], y[1::2]
 ## INSERT YOUR CODE HERE
 
 
+weights = train(Xtrain, Ytrain)
 
+err = 0
+for i in range(99):
+    Ypredicted = Xtrain[i] * weights
+    err += Ypredicted - Ytrain[i]
 
-
-
+print(err)
 
 #########################################
 

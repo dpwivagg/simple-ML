@@ -146,7 +146,6 @@ def train(X, Y, alpha=0.001, n_epoch=100):
         
     # update the parameters w
         w = update_w(w, dL_dw, alpha)
-        print(w)
      #########################################
 
     return w
