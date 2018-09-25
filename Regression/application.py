@@ -24,10 +24,13 @@ Xtrain, Ytrain, Xtest, Ytest = X[::2], y[::2], X[1::2], y[1::2]
 ## INSERT YOUR CODE HERE
 
 
-weights = train(Xtrain, Ytrain)
+alpha = 0.05
+n_epoch = 500
 
-yhat_train = np.dot(weights, Xtrain)
-yhat_test = np.dot(weights, Xtest)
+weights = train(Xtrain, Ytrain, alpha, n_epoch)
+
+yhat_train = np.dot(Xtrain, weights)
+yhat_test = np.dot(Xtest, weights)
 
 train_loss = compute_L(yhat_train, Ytrain)
 test_loss = compute_L(yhat_test, Ytest)
