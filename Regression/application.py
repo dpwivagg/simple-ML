@@ -26,12 +26,14 @@ Xtrain, Ytrain, Xtest, Ytest = X[::2], y[::2], X[1::2], y[1::2]
 
 weights = train(Xtrain, Ytrain)
 
-err = 0
-for i in range(99):
-    Ypredicted = Xtrain[i] * weights
-    err += Ypredicted - Ytrain[i]
+yhat_train = np.dot(weights, Xtrain)
+yhat_test = np.dot(weights, Xtest)
 
-print(err)
+train_loss = compute_L(yhat_train, Ytrain)
+test_loss = compute_L(yhat_test, Ytest)
+
+print("Training loss: ", train_loss)
+print("Testing loss: ", test_loss)
 
 #########################################
 
