@@ -77,11 +77,15 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
-
-
+    try:
+        exponential = np.exp(-z).item()
+        a = 1 / (1 + exponential)
+    except:
+        # For very very large values of z, we know that the activation is either very close to 1 or very close to 0
+        if z > 0:
+            a = 1
+        else:
+            a = 0
 
     #########################################
     return a
@@ -99,12 +103,13 @@ def compute_L(a,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
-
-
-
+    try:
+        if y == 1:
+            L = -np.log(a).item()
+        else:
+            L = -np.log(1 - a).item()
+    except:
+        L = 1e6
     #########################################
     return L 
 
@@ -126,11 +131,9 @@ def forward(x,y,w,b):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
-
-
-
-
+    z = compute_z(x, w, b)
+    a = compute_a(z)
+    L = compute_L(a, y)
 
     #########################################
     return z, a, L 
@@ -154,12 +157,12 @@ def compute_dL_da(a, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-
-
-
-
-
-
+    try:
+        dL_da = (-y / a) + ((1 - y)/(1 - a))
+    except ZeroDivisionError:
+        dL_da = -1e6
+        if y == 0:
+            dL_da = 1e6
     #########################################
     return dL_da 
 
@@ -179,7 +182,7 @@ def compute_da_dz(a):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
+    da_dz = a * (1 - a)
 
     #########################################
     return da_dz 
@@ -199,7 +202,8 @@ def compute_dz_dw(x):
     #########################################
     ## INSERT YOUR CODE HERE
 
-    
+    dz_dw = x
+
     #########################################
     return dz_dw
 
@@ -214,7 +218,7 @@ def compute_dz_db():
     #########################################
     ## INSERT YOUR CODE HERE
 
-    
+    dz_db = 1
 
     #########################################
     return dz_db
@@ -242,9 +246,10 @@ def backward(x,y,a):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
-
-
+    dL_da = compute_dL_da(a, y)
+    da_dz = compute_da_dz(a)
+    dz_dw = compute_dz_dw(x)
+    dz_db = compute_dz_db()
 
     #########################################
     return dL_da, da_dz, dz_dw, dz_db 
@@ -267,8 +272,7 @@ def compute_dL_dw(dL_da, da_dz, dz_dw):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
-
+    dL_dw = dL_da * da_dz * dz_dw
 
     #########################################
     return dL_dw
@@ -289,8 +293,7 @@ def compute_dL_db(dL_da, da_dz, dz_db):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
-
+    dL_db = dL_da * da_dz * dz_db
 
     #########################################
     return dL_db 
@@ -316,8 +319,7 @@ def update_w(w, dL_dw, alpha=0.001):
     #########################################
     ## INSERT YOUR CODE HERE
 
-
-
+    w = w - alpha * dL_dw
 
     #########################################
     return w
@@ -338,9 +340,7 @@ def update_b(b, dL_db, alpha=0.001):
     #########################################
     ## INSERT YOUR CODE HERE
     
-
-
-
+    b = b - alpha * dL_db
 
     #########################################
     return  b 
@@ -369,12 +369,15 @@ We repeat n_epoch passes over all the training instances.
             x = x.T # convert to column vector
             #########################################
             ## INSERT YOUR CODE HERE
+            z, a, L = forward(x, y, w, b)
 
+            dL_da, da_dz, dz_dw, dz_db = backward(x, y, a)
 
+            dL_dw = compute_dL_dw(dL_da, da_dz, dz_dw)
+            dL_db = compute_dL_db(dL_da, da_dz, dz_db)
 
-
-
-         
+            w = update_w(w, dL_dw, alpha)
+            b = update_b(b, dL_db, alpha)
 
             #########################################
     return w, b
@@ -403,13 +406,9 @@ def predict(Xtest, w, b):
         x = x.T # convert to column vector
         #########################################
         ## INSERT YOUR CODE HERE
-
-
-
-
-
-
-
+        z = compute_z(x, w, b)
+        Y[i] = 0 if z < 0 else 1
+        P[i] = compute_a(z)
         #########################################
     return Y, P
 
