@@ -65,7 +65,7 @@ def compute_z(x,W,b):
     #########################################
     ## INSERT YOUR CODE HERE
 
-    
+    z = (W * x) + b
     
     #########################################
     return z 
@@ -82,7 +82,16 @@ def compute_a(z):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+
+    # Normalize to avoid overflow--we can handle underflow by just setting to a very small number
+
+    b = z.max()
+    z = z - b
+    z[z < -500] = -500
+
+    y = np.exp(z)
+
+    a = y / y.sum()
     #########################################
     return a
 
@@ -98,6 +107,10 @@ def compute_L(a,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    if a[y] == 0:
+        L = 1e6
+    else:
+        L = -np.log(a[y]).item()
     
     #########################################
     return L 
@@ -118,6 +131,10 @@ def forward(x,y,W,b):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
+    z = compute_z(x, W, b)
+    a = compute_a(z)
+    L = compute_L(a, y)
     
     #########################################
     return z, a, L 
@@ -141,8 +158,14 @@ def compute_dL_da(a, y):
                    The i-th element dL_da[i] represents the partial gradient of the loss function w.r.t. the i-th activation a[i]:  d_L / d_a[i].
     '''
     #########################################
-    ## INSERT YOUR CODE HERE     
-    
+    ## INSERT YOUR CODE HERE
+
+    dL_da = np.zeros_like(a)
+
+    if a[y] == 0:
+        dL_da[y] = -1e6
+    else:
+        dL_da[y] = -1/a[y]
     
     #########################################
     return dL_da 
@@ -162,7 +185,11 @@ def compute_da_dz(a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+    da_dz = a
+    da_dz[0] = 
+    for i in range(len(a) - 1):
+        dz_dW = np.concatenate((dz_dW, x),1)
+
     #########################################
     return da_dz 
 
@@ -181,10 +208,12 @@ def compute_dz_dW(x,c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+    dz_dW = x
+    for _ in range(c-1):
+        dz_dW = np.concatenate((dz_dW, x),1)
 
     #########################################
-    return dz_dW
+    return dz_dW.T
 
 
 
@@ -202,7 +231,7 @@ def compute_dz_db(c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+    dz_db = np.ones_like(c)
     
     #########################################
     return dz_db
@@ -233,9 +262,11 @@ def backward(x,y,a):
     #########################################
     ## INSERT YOUR CODE HERE
     
-    
-    
-    
+    dL_da = compute_dL_da(a, y)
+    da_dz = compute_da_dz(a)
+    dz_dW = compute_dz_dW(x, len(a))
+    dz_db = compute_dz_db(len(a))
+
     #########################################
     return dL_da, da_dz, dz_dW, dz_db
 
