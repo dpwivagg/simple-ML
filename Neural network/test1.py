@@ -469,3 +469,4 @@ def test_softmax_regression():
     print ('Test accuracy:', accuracy)
     assert accuracy > 0.85
 
+

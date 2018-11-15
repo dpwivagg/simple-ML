@@ -92,6 +92,7 @@ def compute_a(z):
     y = np.exp(z)
 
     a = y / y.sum()
+
     #########################################
     return a
 
@@ -107,6 +108,7 @@ def compute_L(a,y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
     if a[y] == 0:
         L = 1e6
     else:
@@ -135,7 +137,8 @@ def forward(x,y,W,b):
     z = compute_z(x, W, b)
     a = compute_a(z)
     L = compute_L(a, y)
-    
+
+
     #########################################
     return z, a, L 
 
@@ -185,10 +188,10 @@ def compute_da_dz(a):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    da_dz = a
-    da_dz[0] = 
-    for i in range(len(a) - 1):
-        dz_dW = np.concatenate((dz_dW, x),1)
+    da_dz = -a * a.T
+
+    for i in range(len(a)):
+        da_dz[i,i] = a[i] * (1 - a[i])
 
     #########################################
     return da_dz 
@@ -231,7 +234,7 @@ def compute_dz_db(c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    dz_db = np.ones_like(c)
+    dz_db = np.asmatrix(np.ones((c,1)))
     
     #########################################
     return dz_db
@@ -286,7 +289,7 @@ def compute_dL_dz(dL_da,da_dz):
     #########################################
     ## INSERT YOUR CODE HERE
     
-    
+    dL_dz = da_dz * dL_da
     
     #########################################
     return dL_dz
@@ -309,8 +312,9 @@ def compute_dL_dW(dL_dz,dz_dW):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
-    
+
+    dL_dW = np.multiply(dL_dz, dz_dW)
+
     #########################################
     return dL_dW
 
@@ -333,7 +337,7 @@ def compute_dL_db(dL_dz,dz_db):
     #########################################
     ## INSERT YOUR CODE HERE
     
-
+    dL_db = np.multiply(dL_dz, dz_db)
 
     #########################################
     return dL_db 
@@ -358,6 +362,7 @@ def update_W(W, dL_dW, alpha=0.001):
     #########################################
     ## INSERT YOUR CODE HERE
     
+    W = W - alpha * dL_dW
 
     #########################################
     return W
@@ -381,7 +386,7 @@ def update_b(b, dL_db, alpha=0.001):
     #########################################
     ## INSERT YOUR CODE HERE
     
-    
+    b = b - alpha * dL_db
     
     #########################################
     return b 
@@ -417,17 +422,19 @@ def train(X, Y, alpha=0.01, n_epoch=100):
             #########################################
             ## INSERT YOUR CODE HERE
             # Forward pass: compute the logits, softmax and cross_entropy 
-    
-            
-            # Back Propagation: compute local gradients of cross_entropy, softmax and logits
-    
+            z, a, L = forward(x, y, W, b)
 
+            # Back Propagation: compute local gradients of cross_entropy, softmax and logits
+            dL_da, da_dz, dz_dW, dz_db = backward(x, y, a)
 
             # compute the global gradients using chain rule 
-    
+            dL_dz = compute_dL_dz(dL_da, da_dz)
+            dL_dW = compute_dL_dW(dL_dz, dz_dW)
+            dL_db = compute_dL_db(dL_dz, dz_db)
 
             # update the paramters using gradient descent
-    
+            W = update_W(W, dL_dW, alpha)
+            b = update_b(b, dL_db, alpha)
 
             #########################################
     return W, b
@@ -453,6 +460,9 @@ def predict(Xtest, W, b):
         x = x.T # convert to column vector
         #########################################
         ## INSERT YOUR CODE HERE
+        z = compute_z(x, W, b)
+        Y[i] = np.argmax(z)
+        P[i] = compute_a(z).T
     
         #########################################
     return Y, P 

@@ -97,7 +97,8 @@ def compute_z1(x,W1,b1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+    z1 = W1 * x + b1
+
     #########################################
     return z1
 
@@ -117,7 +118,17 @@ def compute_a1(z1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+
+    a1 = np.zeros_like(z1)
+
+    for i in range(len(z1)):
+        try:
+            a1[i] = 1 / (1 + np.exp(-z1[i]))
+        except:
+            # For very very large values of z, we know that the activation is either very close to 1 or very close to 0
+            if z1[i] > 0:
+                a1[i] = 1
+
     #########################################
     return a1 
 
@@ -134,6 +145,8 @@ def compute_z2(a1,W2,b2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
+    z2 = W2 * a1 + b2
     
     #########################################
     return z2
@@ -153,6 +166,8 @@ def compute_a2(z2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
+    a2 = sr.compute_a(z2)
     
     #########################################
     return a2 
@@ -178,10 +193,12 @@ def forward(x, W1, b1, W2, b2):
     #########################################
     ## INSERT YOUR CODE HERE
     # first layer
-    
+    z1 = compute_z1(x, W1, b1)
+    a1 = compute_a1(z1)
 
     # second layer
-    
+    z2 = compute_z2(a1, W2, b2)
+    a2 = compute_a2(z2)
 
     #########################################
     return z1, a1, z2, a2
@@ -204,7 +221,7 @@ def compute_dL_da2(a2, y):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+    dL_da2 = sr.compute_dL_da(a2, y)
 
     #########################################
     return dL_da2
@@ -221,6 +238,7 @@ def compute_da2_dz2(a2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+    da2_dz2 = sr.compute_da_dz(a2)
     
     #########################################
     return da2_dz2 
@@ -238,7 +256,8 @@ def compute_dz2_dW2(a1,c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+
+    dz2_dW2 = sr.compute_dz_dW(a1, c)
 
     #########################################
     return dz2_dW2
@@ -256,6 +275,8 @@ def compute_dz2_db2(c):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
+    dz2_db2 = sr.compute_dz_db(c)
     
     #########################################
     return dz2_db2
@@ -274,6 +295,8 @@ def compute_dz2_da1(W2):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
+    dz2_da1 = W2
     
     #########################################
     return dz2_da1 
@@ -293,6 +316,8 @@ def compute_da1_dz1(a1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
+    da1_dz1 = np.multiply(a1, (1 - a1))
     
     #########################################
     return da1_dz1 
@@ -311,6 +336,8 @@ def compute_dz1_dW1(x,h):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
+
+    dz1_dW1 = sr.compute_dz_dW(x, h)
     
     #########################################
     return dz1_dW1
@@ -328,7 +355,9 @@ def compute_dz1_db1(h):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+
+    dz1_db1 = sr.compute_dz_db(h)
+
     #########################################
     return dz1_db1
 
@@ -354,10 +383,17 @@ def backward(x,y,a1,a2,W2):
     #########################################
     ## INSERT YOUR CODE HERE
     # 2nd layer
-    
+
+    dL_da2 = compute_dL_da2(a2, y)
+    da2_dz2 = compute_da2_dz2(a2)
+    dz2_dW2 = compute_dz2_dW2(a1, len(a2))
+    dz2_db2 = compute_dz2_db2(len(a2))
+    dz2_da1 = compute_dz2_da1(W2)
 
     # 1st layer
-    
+    da1_dz1 = compute_da1_dz1(a1)
+    dz1_dW1 = compute_dz1_dW1(x, len(a1))
+    dz1_db1 = compute_dz1_db1(len(a1))
     
     #########################################
     return dL_da2, da2_dz2, dz2_dW2, dz2_db2, dz2_da1, da1_dz1, dz1_dW1, dz1_db1
@@ -379,7 +415,8 @@ def compute_dL_da1(dL_dz2,dz2_da1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+
+    dL_da1 = dz2_da1.T * dL_dz2
 
     #########################################
     return dL_da1
@@ -399,7 +436,8 @@ def compute_dL_dz1(dL_da1,da1_dz1):
     '''
     #########################################
     ## INSERT YOUR CODE HERE
-    
+
+    dL_dz1 = np.multiply(dL_da1, da1_dz1)
 
     #########################################
     return dL_dz1
@@ -420,9 +458,15 @@ def compute_gradients(dL_da2, da2_dz2, dz2_dW2, dz2_db2, dz2_da1, da1_dz1, dz1_d
     #########################################
     ## INSERT YOUR CODE HERE
     # the 2nd layer
-    
+    dL_dz2 = sr.compute_dL_dz(dL_da2, da2_dz2)
+    dL_dW2 = sr.compute_dL_dW(dL_dz2, dz2_dW2)
+    dL_db2 = sr.compute_dL_db(dL_dz2, dz2_db2)
 
     # the 1st layer
+    dL_da1 = compute_dL_da1(dL_dz2, dz2_da1)
+    dL_dz1 = np.multiply(dL_da1, da1_dz1)
+    dL_dW1 = sr.compute_dL_dW(dL_dz1, dz1_dW1)
+    dL_db1 = sr.compute_dL_db(dL_dz1, dz1_db1)
     
     #########################################
 
@@ -466,15 +510,20 @@ def train(X, Y,h=3, n_layers=3, alpha=0.01, n_epoch=100):
             ## INSERT YOUR CODE HERE
 
             # Forward pass
-    
-            
-            # compute local gradients 
-    
+            z1, a1, z2, a2 = forward(x, W1, b1, W2, b2)
+
+            # compute local gradients
+            dL_da2, da2_dz2, dz2_dW2, dz2_db2, dz2_da1, da1_dz1, dz1_dW1, dz1_db1 = backward(x, y, a1, a2, W2)
 
             # Back Propagation
-    
+            dL_dW2, dL_db2, dL_dW1, dL_db1 = compute_gradients(dL_da2, da2_dz2, dz2_dW2, dz2_db2, dz2_da1, da1_dz1,
+                                                               dz1_dW1, dz1_db1)
 
             # update the paramters using gradient descent
+            W1 = sr.update_W(W1, dL_dW1, alpha)
+            b1 = sr.update_b(b1, dL_db1, alpha)
+            W2 = sr.update_W(W2, dL_dW2, alpha)
+            b2 = sr.update_b(b2, dL_db2, alpha)
     
             #########################################
     return W1, b1, W2, b2
@@ -498,7 +547,9 @@ def predict(Xtest, W1,b1,W2,b2):
         x = x.T # convert to column vector
         #########################################
         ## INSERT YOUR CODE HERE
-    
+        z2 = compute_z2(compute_a1(compute_z1(x, W1, b1)),W2, b2)
+        Y[i] = np.argmax(z2)
+        P[i] = compute_a2(z2).T
 
         #########################################
     return Y, P
